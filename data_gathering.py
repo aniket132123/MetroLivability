@@ -1,8 +1,7 @@
-from airflow.models import DAG
 import requests
 import json
 import os
-from dotenv import load_dotenv, dotenv_values 
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 import pandas as pd
 
@@ -34,8 +33,6 @@ house_prices.to_sql(
 )
 
 # Salaries API
-# TODO: get the salaries for every state in housing prices table
-# TODO: get the salaries for various different positions
 endpoint = f"/v1/comparesalaries/{os.getenv("SALARIES_USER_ID")}/wageocc"
 url = "https://api.careeronestop.org" + endpoint
 
@@ -44,6 +41,8 @@ headers = {
     "Authorization": f"Bearer {os.getenv("SALARIES_API_KEY")}"
 }
 
+# TODO: get the salaries for every state in housing prices table
+# TODO: get the salaries for various different positions
 params = {
     "keyword" : "Software Developers",
     "location" : "VA",
@@ -64,8 +63,8 @@ url = "https://api.open-meteo.com/v1/forecast"
 params = {
     "latitude": '47.6',
     "longitude": '122.3',
-    "start_date": "2025-10-08",
-    "end_date": "2026-01-06",
+    "start_date": "2025-10-24",
+    "end_date": "2026-01-22",
     "daily": "temperature_2m_mean"
 }
 response = requests.get(url, params=params)
