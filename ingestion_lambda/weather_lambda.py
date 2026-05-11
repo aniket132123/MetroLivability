@@ -4,11 +4,15 @@ import boto3
 import urllib3
 import pandas as pd
 import requests
+import io
+from io import StringIO
+
+s3 = boto3.client('s3')
 
 def lambda_handler(event, context):
     curr_date = datetime.datetime.now().date()
     start_date = curr_date - datetime.timedelta(days=90)
-    end_date = curr_date + datetime.timedelta(days=16)
+    end_date = curr_date + datetime.timedelta(days=5)
 
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
@@ -22,15 +26,21 @@ def lambda_handler(event, context):
     try:
         http = urllib3.PoolManager()
         r = http.request('GET', url, fields=params)
+        info = r.json()
 
         # Convert to Pandas DataFrame
-        df = pd.DataFrame(data['daily'])
+        df = pd.DataFrame(info)
 
         # Upload to S3
         csv_buffer = StringIO()
         df.to_csv(csv_buffer, index=False)
-        s3_resource = boto3.resource('s3')
-        s3_resource.Object('weather-data-2023', f'weather_data_{curr_date}.csv').put(Body=csv_buffer.getvalue())
+        file_name = "weather.csv"
+        bucket_name = "metro-data-bucket"
+        s3.put_object(
+            Bucket=bucket_name,
+            Key=file_name,
+            Body=csv_buffer.getvalue()
+        )
     except Exception as e:
         print(e)
         return {
