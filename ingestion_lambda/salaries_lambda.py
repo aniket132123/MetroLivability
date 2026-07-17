@@ -3,6 +3,8 @@ from botocore.exceptions import ClientError
 import json
 import io
 import urllib3
+import pandas as pd
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 s3 = boto3.client('s3')
 
@@ -39,27 +41,71 @@ def lambda_handler(event, context):
     bucket_name = "metro-data-bucket"
     endpoint = f'https://api.careeronestop.org/v1/comparesalaries/{get_secret("SALARIES_USER_ID")}/wageocc'
     
+    occ_file = s3.get_object(Bucket=bucket_name, Key="All_Occupations.csv")
+    file_content = occ_file['Body'].read().decode('utf-8')
+    df = pd.read_csv(io.StringIO(file_content))
+    occupation_list = df['Occupation'].tolist()
+
+    http = urllib3.PoolManager()
+        
+    headers = {
+        "Content-Type":"application/json",
+        "Authorization": f'Bearer {get_secret("SALARIES_API_KEY")}'
+    }
+
+    all_records = []
+
     # Upload the json to S3
     try:
-        http = urllib3.PoolManager()
-
-        headers = {
-            "Content-Type":"application/json",
-            "Authorization": f'Bearer {get_secret("SALARIES_API_KEY")}'
-        }
-
         for state in states:
-            file_name = state + "_salaries.json"
-            params = {
-                "keyword" : "Software Developers",
-                "location" : state,
-                "enableMetaData" : False
-            }
+            for occupation in occupation_list:
+                file_name = state + "_" + occupation.replace(" ", "_") + "_salaries.json"
+                params = {
+                    "keyword" : occupation,
+                    "location" : state,
+                    "enableMetaData" : False
+                }
 
-            r = http.request('GET', endpoint, fields=params, headers=headers)
+                r = http.request('GET', endpoint, fields=params, headers=headers)
+                data = json.loads(r.data.decode('utf-8'))
 
-            file_object = io.BytesIO(r.data)
-            s3.upload_fileobj(file_object, bucket_name, file_name)
+                has_wage_data = (
+                    data.get('LocationsList') and 
+                    data['LocationsList'][0].get('OccupationList') and
+                    data['LocationsList'][0]['OccupationList'][0].get('WageInfo') and
+                    len(data['LocationsList'][0]['OccupationList'][0]['WageInfo']) > 0
+                )
+
+                if has_wage_data:
+                    df_normalized = pd.json_normalize(
+                        data['LocationsList'],
+                        record_path=['OccupationList', 'WageInfo'],
+                        meta=[
+                            'LocationName',
+                            'InputLocation',
+                            ['OccupationList', 'Title']
+                        ]
+                    )
+
+                    if not df_normalized.empty:
+                        all_records.append(df_normalized)
+
+                # file_object = io.BytesIO(r.data)
+                # s3.upload_fileobj(file_object, bucket_name, file_name)
+        
+        result_df = pd.concat(all_records, ignore_index=True)
+
+        sv_buffer = io.StringIO()
+        result_df.to_csv(csv_buffer, index=False)
+        csv_buffer.seek(0)
+
+        s3.put_object(
+            Bucket=bucket_name,
+            Key="consolidated_salaries.csv",
+            Body=csv_buffer.getvalue().encode('utf-8')
+        )
+
+            
 
         return {
             'statusCode': 200,
