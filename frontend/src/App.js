@@ -1,9 +1,13 @@
 import logo from './logo.svg';
 import './App.css';
+import TestData from './components/TestDataComponent';
 
 function App() {
   return (
-    <h1>HELLO!</h1>
+    <div>
+      <h1>HELLO!</h1>
+      <TestData />
+    </div>
   );
 }
 
