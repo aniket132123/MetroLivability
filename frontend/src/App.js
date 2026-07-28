@@ -1,14 +1,17 @@
 import logo from './logo.svg';
 import './App.css';
 import TestData from './components/TestDataComponent';
+import Main from './pages/Main';
 
 function App() {
   return (
     <div>
-      <h1>HELLO!</h1>
-      <TestData />
+      <Main />
     </div>
   );
 }
 
 export default App;
+
+// ./mvnw spring-boot:run
+// npm run start

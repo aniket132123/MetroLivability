@@ -8,19 +8,19 @@ function TestData(){
     useEffect( () => {
         const fetchData = async () => {
             try {
-                setLoading(true)
+                setLoading(true);
                 const response = await fetch('http://localhost:8080/data');
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-
+                
                 const response_data = await response.json();
 
                 loadData(response_data);
                 
             } catch (error) {
-                console.error("Error fetching data!", error)
+                throw error;
             } finally {
                 setLoading(false);
             };
@@ -30,9 +30,9 @@ function TestData(){
         
     }, []);
 
-    return <div>
+    return (<div>
         <h2>{data}</h2>
-    </div>
+    </div>);
 }
 
 export default TestData;
