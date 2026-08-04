@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import USMapComponent from '../components/USMapComponent'
 
 const STATES = [
   { id: 'WA', name: 'Washington', paths: ['M 118 42 L 232 42 L 232 94 L 208 107 L 192 115 L 154 115 L 127 115 L 118 95 Z'], lx: 175, ly: 79 },
@@ -116,7 +117,7 @@ export default function Main() {
   const [selectedState, setSelectedState] = useState(null)
   const [hoveredState, setHoveredState] = useState(null)
   const [occupation, setOccupation] = useState('')
-  const [climates, setClimates] = useState<Set<string>>(new Set())
+  const [climates, setClimates] = useState(new Set())
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
@@ -185,104 +186,15 @@ export default function Main() {
             >
               {displayStateName ? (
                 <>
-                  <span style={{ color: 'var(--muted)', fontStyle: 'italic', fontWeight: 400 }}>you picked </span>
+                  <span style={{ color: 'var(--muted)', fontStyle: 'italic', fontWeight: 400 }}>You picked </span>
                   {displayStateName}
                 </>
               ) : (
                 'Pick a state.'
               )}
             </h1>
-          </div>
-
-          {/* Map container */}
-          <div
-            style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
-              borderRadius: '8px',
-              overflow: 'hidden',
-            }}
-          >
-            <svg
-              viewBox="0 0 960 590"
-              style={{ display: 'block', width: '100%' }}
-              aria-label="Map of the United States — click a state to select it"
-            >
-              {/* Render state paths */}
-              {STATES.map(state =>
-                state.paths.map((d, i) => (
-                  <path
-                    key={`${state.id}-${i}`}
-                    d={d}
-                    style={{
-                      fill:
-                        selectedState === state.id
-                          ? 'var(--map-selected)'
-                          : hoveredState === state.id
-                            ? 'var(--map-hover)'
-                            : 'var(--map-state)',
-                      stroke: 'var(--map-stroke)',
-                      strokeWidth: 0.8,
-                      cursor: 'pointer',
-                      transition: 'fill 0.12s ease',
-                    }}
-                    onClick={() => handleStateClick(state.id)}
-                    onMouseEnter={() => setHoveredState(state.id)}
-                    onMouseLeave={() => setHoveredState(null)}
-                  />
-                ))
-              )}
-
-              {/* State abbreviation labels */}
-              {STATES.filter(s => !s.hideLabel).map(state => (
-                <text
-                  key={`lbl-${state.id}`}
-                  x={state.lx}
-                  y={state.ly}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  style={{
-                    fontSize: 9,
-                    fill: 'var(--map-text)',
-                    fontFamily: 'var(--font-sans)',
-                    fontWeight: 500,
-                    pointerEvents: 'none',
-                    userSelect: 'none',
-                    opacity: selectedState === state.id ? 1 : 0.65,
-                  }}
-                >
-                  {state.id}
-                </text>
-              ))}
-
-              {/* Inset box labels */}
-              <rect x="82" y="480" width="180" height="86" fill="none" stroke="var(--border)" strokeWidth="0.6" strokeDasharray="3 2" rx="2" />
-              <text x="86" y="476" style={{ fontSize: 7, fill: 'var(--muted)', fontFamily: 'var(--font-sans)' }}>AK</text>
-              <rect x="285" y="513" width="154" height="60" fill="none" stroke="var(--border)" strokeWidth="0.6" strokeDasharray="3 2" rx="2" />
-              <text x="289" y="509" style={{ fontSize: 7, fill: 'var(--muted)', fontFamily: 'var(--font-sans)' }}>HI</text>
-            </svg>
-          </div>
-
-          {/* Selected state sub-label */}
-          <div className="mt-2 h-5">
-            {selectedState && !hoveredState && (
-              <p style={{ color: 'var(--muted)' }} className="text-xs flex items-center gap-2">
-                <span style={{ color: 'var(--accent)' }}>●</span>
-                {STATES.find(s => s.id === selectedState)?.name} selected
-                <button
-                  onClick={() => setSelectedState(null)}
-                  style={{ color: 'var(--muted)', textDecoration: 'underline', textDecorationStyle: 'dotted' }}
-                  className="ml-1 hover:opacity-60 transition-opacity"
-                >
-                  clear
-                </button>
-              </p>
-            )}
-            {!selectedState && (
-              <p style={{ color: 'var(--muted)' }} className="text-xs">
-                Click any state to select it
-              </p>
-            )}
+            
+          <USMapComponent></USMapComponent>
           </div>
         </div>
 

@@ -1,13 +1,57 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+
+:root {
+  --bg: #f0ebe0;
+  --surface: #e8e2d5;
+  --border: #cec5b2;
+  --text: #28231e;
+  --muted: #7a7065;
+  --accent: #8a6a48;
+  --map-state: #5a5552;
+  --map-hover: #726e6a;
+  --map-selected: #8a7455;
+  --map-stroke: #38332f;
+  --map-text: #d8d2c8;
+  --font-display: 'Libre Baskerville', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.dark {
+  --bg: #1c1a17;
+  --surface: #242118;
+  --border: #3a3728;
+  --text: #ede8dc;
+  --muted: #8a8478;
+  --accent: #b8956a;
+  --map-state: #484440;
+  --map-hover: #5e5a54;
+  --map-selected: #8a7455;
+  --map-stroke: #28251e;
+  --map-text: #ccc8bc;
 }
+
+html {
+  background-color: var(--bg);
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+::selection {
+  background: var(--map-selected);
+  color: var(--bg);
+}
+
+/* Hide scrollbar while keeping scroll */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
